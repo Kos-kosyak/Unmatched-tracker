@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#667eea">
+<title>Unmatched Tracker</title>
+<style>
+:root{
+  --bg-start:#667eea;--bg-end:#764ba2;
+  --card-bg:#fff;--card-fg:#333;
+  --text:#333;--text-muted:#666;--text-subtle:#999;
+  --border:#ddd;--border-soft:#e0e0e0;--surface:#f8f9fa;
+  --primary:#667eea;--primary-2:#764ba2;
+  --success:#27ae60;--success-bg:#d4edda;--success-fg:#155724;
+  --danger:#e74c3c;--danger-bg:#f8d7da;--danger-fg:#721c24;
+  --warning:#f39c12;--warning-bg:#fff3cd;--warning-fg:#856404;
+  --shadow:0 5px 20px rgba(0,0,0,.15);
+  --p1:#3498db;--p2:#e74c3c;--p3:#27ae60;--p4:#f39c12;
+}
+body.dark{
+  --bg-start:#1a1a2e;--bg-end:#16213e;
+  --card-bg:#2d2d44;--card-fg:#eee;
+  --text:#eee;--text-muted:#bbb;--text-subtle:#888;
+  --border:#444;--border-soft:#3a3a52;--surface:#232336;
+  --success-bg:#1e3a28;--success-fg:#8fe3a8;
+  --danger-bg:#3a1e22;--danger-fg:#f5a3ad;
+  --warning-bg:#3a301e;--warning-fg:#f0cd7a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,var(--bg-start),var(--bg-end));min-height:100vh;padding:15px;background-size:cover;background-position:center;background-attachment:fixed;color:var(--text)}
+body::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:0;pointer-events:none}
+.container{max-width:750px;margin:0 auto;position:relative;z-index:1}
+h1{color:#fff;text-align:center;margin-bottom:20px;font-size:26px;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+h2{margin-bottom:15px;font-size:20px}
+h3{margin:20px 0 10px;font-size:16px}
+.tabs{display:flex;gap:6px;margin-bottom:15px;flex-wrap:wrap}
+.tab{flex:1;min-width:70px;padding:8px;background:rgba(255,255,255,.3);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.tab.active{background:#fff;color:var(--primary)}
+.card{background:var(--card-bg);color:var(--card-fg);border-radius:15px;padding:20px;box-shadow:var(--shadow);margin-bottom:15px}
+.form-group{margin-bottom:12px}
+label{display:block;margin-bottom:4px;color:var(--text);font-weight:600;font-size:13px}
+input,select,textarea{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:15px;background:var(--card-bg);color:var(--text)}
+input:focus,select:focus{outline:none;border-color:var(--primary)}
+textarea{min-height:50px;resize:vertical}
+.btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px}
+.btn-danger{background:linear-gradient(135deg,#f093fb,#f5576c)}
+.btn-success{background:linear-gradient(135deg,#27ae60,#2ecc71)}
+.btn-secondary{background:linear-gradient(135deg,#95a5a6,#7f8c8d)}
+.hidden{display:none!important}
+.player-block{background:var(--surface);border:2px solid var(--border-soft);border-radius:10px;padding:12px;margin-bottom:10px}
+.player-block-title{font-weight:700;color:var(--primary);margin-bottom:8px;font-size:14px}
+.mode-btns,.submode-btns,.theme-btns{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.mode-btn,.submode-btn,.theme-btn{flex:1;min-width:80px;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card-bg);cursor:pointer;font-weight:600;font-size:13px;color:var(--text)}
+.mode-btn.active,.submode-btn.active,.theme-btn.active{border-color:var(--primary);background:var(--primary);color:#fff}
+.winner-btns{display:flex;gap:8px;flex-wrap:wrap}
+.winner-btn{flex:1;min-width:80px;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card-bg);cursor:pointer;font-weight:600;text-align:center;color:var(--text)}
+.winner-btn.active{border-color:var(--success);background:var(--success);color:#fff}
+.player-badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:5px;color:#fff}
+.player-select-row{display:flex;gap:8px;align-items:center}
+.player-select-row select{flex:1}
+.add-player-btn{background:var(--success);color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;min-width:40px}
+.stat-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface);border-radius:8px;margin-bottom:8px;border-left:4px solid var(--primary)}
+.stat-name{font-weight:600;color:var(--text)}
+.stat-wr{color:var(--primary);font-weight:700;font-size:17px}
+.stat-wins{color:var(--success);font-weight:600;font-size:13px}
+.stat-losses{color:var(--danger);font-weight:600;font-size:13px}
+.match-item{padding:12px;background:var(--surface);border-radius:8px;margin-bottom:8px;border-left:4px solid var(--success);position:relative}
+.match-info{font-weight:600;color:var(--text);margin-bottom:4px;font-size:14px;padding-right:30px}
+.match-date{font-size:11px;color:var(--text-subtle)}
+.match-winner{background:var(--success);color:#fff;padding:4px 10px;border-radius:15px;font-size:11px;font-weight:600;display:inline-block;margin-top:6px}
+.del-btn{background:var(--danger);color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;position:absolute;top:8px;right:8px}
+.empty{text-align:center;padding:30px;color:var(--text-subtle)}
+.add-char{background:var(--success);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;margin-top:8px}
+.char-row{display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--surface);border-radius:6px;margin-bottom:4px}
+.matchup-table{width:100%;border-collapse:collapse;margin-top:10px}
+.matchup-table th,.matchup-table td{padding:8px;text-align:center;border:1px solid var(--border);font-size:12px}
+.matchup-table th{background:var(--primary);color:#fff;font-weight:600}
+.matchup-cell{cursor:pointer}
+.matchup-win{background:var(--success-bg);color:var(--success-fg)}
+.matchup-neutral{background:var(--warning-bg);color:var(--warning-fg)}
+.matchup-lose{background:var(--danger-bg);color:var(--danger-fg)}
+.matchup-empty{background:var(--surface);color:var(--text-subtle)}
+.streak-badge{display:inline-block;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-left:5px}
+.streak-win{background:var(--success);color:#fff}
+.streak-lose{background:var(--danger);color:#fff}
+.ach-card{padding:15px;margin-bottom:10px;border-radius:10px;border-left:5px solid var(--warning);background:var(--surface);cursor:pointer;transition:transform .15s}
+.ach-card:hover{transform:translateX(3px)}
+.ach-card.unlocked{border-left-color:var(--success);background:var(--success-bg)}
+.ach-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.ach-icon{font-size:28px}
+.ach-name{font-weight:700;font-size:15px}
+.ach-desc{font-size:13px;color:var(--text-muted)}
+.ach-hint{font-size:11px;color:var(--text-subtle);margin-top:6px;font-style:italic}
+.mastery-level{display:inline-block;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-left:5px;color:#fff}
+.mastery-novice{background:#95a5a6}
+.mastery-amateur{background:#3498db}
+.mastery-experienced{background:#9b59b6}
+.mastery-master{background:#f39c12}
+.mastery-legend{background:#e74c3c}
+.optional-fields{border:2px dashed var(--border);border-radius:10px;padding:12px;margin-top:10px}
+.optional-toggle{cursor:pointer;color:var(--primary);font-weight:600;font-size:13px}
+.forecast-box{background:var(--surface);border:2px solid var(--primary);border-radius:10px;padding:12px;margin-top:10px}
+.forecast-text{font-weight:600;font-size:14px}
+.player-section{margin-bottom:20px;padding:15px;background:var(--surface);border-radius:10px;border-left:4px solid var(--primary)}
+.player-section-title{font-weight:700;color:var(--primary);font-size:16px;margin-bottom:10px}
+.player-row-header,.player-row-stat{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:10px;font-size:13px}
+.player-row-header{background:var(--primary);color:#fff;border-radius:8px 8px 0 0;font-weight:600}
+.player-row-stat{background:var(--card-bg);border-radius:8px;margin-bottom:8px;border:1px solid var(--border-soft)}
+.survivor-check{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.survivor-check label{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer}
+.sets-list{max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px}
+.set-item{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border-soft)}
+.set-item:last-child{border-bottom:none}
+.set-item input[type="checkbox"]{width:auto}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;font-size:13px;color:var(--text)}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚔️ Unmatched Tracker</h1>
+<div class="tabs" id="tabs">
+<button class="tab active" data-tab="add">Добавить</button>
+<button class="tab" data-tab="matchups">Матчапы</button>
+<button class="tab" data-tab="stats">Статистика</button>
+<button class="tab" data-tab="players">Игроки</button>
+<button class="tab" data-tab="ach">Ачивки</button>
+<button class="tab" data-tab="history">История</button>
+<button class="tab" data-tab="settings">Настройки</button>
+</div>
+
+<div id="tab-add" class="card">
+<div class="form-group">
+<label>Режим игры:</label>
+<div class="mode-btns" id="modeBtns">
+<button class="mode-btn active" data-mode="1v1">1 на 1</button>
+<button class="mode-btn" data-mode="multi">Мультиплеер</button>
+</div>
+</div>
+
+<div id="submodeSection" class="form-group hidden">
+<label>Формат:</label>
+<div class="submode-btns">
+<button class="submode-btn active" data-sub="ffa">Каждый за себя</button>
+<button class="submode-btn" data-sub="2v2">2 на 2</button>
+</div>
+<label class="checkbox-row hidden" id="threePlayersWrap">
+<input type="checkbox" id="threePlayersCb">
+Играют только 3 игрока (без 4-го)
+</label>
+</div>
+
+<div id="playerBlocks"></div>
+<button class="btn btn-secondary" id="addPlayerTop" type="button" style="margin-top:10px">➕ Добавить игрока в реестр</button>
+
+<div id="forecastBox" class="forecast-box hidden">
+<div class="forecast-text" id="forecastText"></div>
+</div>
+
+<div class="form-group">
+<label id="winnerLabel">Победитель:</label>
+<div class="winner-btns" id="winnerBtns"></div>
+<div id="survivorSection" class="hidden" style="margin-top:10px">
+<label>Выжившие в победившей команде:</label>
+<div class="survivor-check" id="survivorCheck"></div>
+</div>
+</div>
+
+<div class="form-group">
+<label>Заметки (необязательно)</label>
+<textarea id="notes" placeholder="Комментарий"></textarea>
+</div>
+
+<div class="optional-fields">
+<div class="optional-toggle" id="optionalToggle">▼ Дополнительные поля</div>
+<div id="optionalContent" class="hidden" style="margin-top:10px">
+<div class="form-group"><label>Длительность (минут)</label><input type="number" id="duration" placeholder="30" min="0"></div>
+<div class="form-group"><label>ХП выживших победителей</label><input type="text" id="winnerHp" placeholder="Например: 5, 3"></div>
+<div class="form-group"><label>Поле/карта</label><input type="text" id="field" placeholder="Название поля"></div>
+</div>
+</div>
+<button class="btn" id="addMatchBtn" style="margin-top:15px">Добавить матч</button>
+</div>
+
+<div id="tab-matchups" class="card hidden">
+<h2>Таблица матчапов (только 1×1)</h2>
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Зелёный = >60%, жёлтый = 40–60%, красный = <40%</p>
+<div id="matchupContent" style="overflow-x:auto"></div>
+</div>
+
+<div id="tab-stats" class="card hidden">
+<h2>Статистика персонажей</h2>
+<div id="statsContent"></div>
+<h3>Уровень мастерства игроков</h3>
+<div id="masteryContent"></div>
+</div>
+
+<div id="tab-players" class="card hidden">
+<h2>Рейтинг игроков</h2>
+<div id="playersContent"></div>
+</div>
+
+<div id="tab-ach" class="card hidden">
+<h2>Достижения</h2>
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:15px">Нажми на достижение, чтобы увидеть кто его получил</p>
+<div id="achContent"></div>
+</div>
+
+<div id="tab-history" class="card hidden">
+<h2>История матчей</h2>
+<div class="form-group"><label>Фильтр по персонажу:</label><select id="fChar"></select></div>
+<div class="form-group"><label>Фильтр по игроку:</label><select id="fPlayer"></select></div>
+<div id="historyContent"></div>
+<button class="btn btn-danger" id="clearAllBtn">Очистить всё</button>
+</div>
+
+<div id="tab-settings" class="card hidden">
+<h2>Настройки</h2>
+<div class="form-group">
+<label>Тема:</label>
+<div class="theme-btns">
+<button class="theme-btn" data-theme="light">Светлая</button>
+<button class="theme-btn" data-theme="dark">Тёмная</button>
+</div>
+</div>
+<div class="form-group">
+<label>Фон (URL картинки):</label>
+<input type="text" id="bgUrl" placeholder="https://...">
+<button class="btn btn-secondary" id="applyBgBtn" style="margin-top:8px">Применить</button>
+<button class="btn btn-secondary" id="removeBgBtn">Убрать фон</button>
+</div>
+<div class="form-group">
+<label>Мои наборы:</label>
+<div class="sets-list" id="setsList"></div>
+</div>
+<div class="form-group">
+<label>Реестр игроков:</label>
+<div id="playerList"></div>
+</div>
+<div class="form-group">
+<button class="btn btn-success" id="exportBtn">Экспорт (JSON)</button>
+<button class="btn btn-secondary" id="importBtn">Импорт</button>
+<input type="file" id="impFile" accept=".json" style="display:none">
+</div>
+<div class="form-group">
+<label>Добавить персонажа:</label>
+<input type="text" id="newCharName" placeholder="Имя персонажа">
+<input type="text" id="newCharGroup" placeholder="Набор" style="margin-top:5px">
+<button class="add-char" id="addCharBtn">Добавить</button>
+</div>
+<div class="form-group">
+<label>Список персонажей:</label>
+<div id="charList"></div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var DEFAULT_GROUPS = {
+'Удары Судьбы':['Гамлет','Шекспир','Титания','Вещие Сёстры'],
+'Родина Солнца':['Ода Нобунага','Томоэ Годзэн'],
+'Битва Легенд 1':['Алиса','Король Артур','Медуза','Синдбад'],
+'Битва Легенд 2':['Ахиллес','Кровавая Мэри','Сунь Укун','Йенненга'],
+'Битва Легенд 3':['Пандора','Черная Борода','Локи','Чупакабра'],
+'Ведьмак Сталь и Серебро':['Геральт','Цири','Древний Леший'],
+'Ведьмак Гибель Королевств':['Эредин','Филиппа','Йеннифэр и Трисс'],
+'Парк Юрского':['Доктор Сэттлер','Ти-Рекс','Рапторы','Роберт Малдун'],
+'Черепашки':['Донателло','Рафаэль','Леонардо','Микеланджело','Крэнг','Шреддер'],
+'Marvel':['Черная Пантера','Женщина Халк','Лунный Рыцарь','Дэдпул','Электра','Человек-Паук','Мисс Марвел','Девушка-Белка','Плащ и Кинжал'],
+'Туман над Мостовой':['Шерлок Холмс','Дракула','Человек-Невидимка','Джекил и Хайд'],
+'Красная Шапочка vs Беовульф':['Красная Шапочка','Беовульф'],
+'Робин Гуд vs Бигфут':['Робин Гуд','Бигфут'],
+'Гудини vs Джинн':['Гудини','Джинн'],
+'Другие':['Уайетт Эрп','Джон Генри','Никола Тесла','Сорвиголова','Зимний Солдат','Призрачный Гонщик','Чупакабра']
+};
+
+var ACHIEVEMENTS = [
+{id:'first_match',name:'Первая игра',desc:'Сыграй первый матч',icon:'🎮'},
+{id:'first_win',name:'Первая победа',desc:'Выиграй первый матч',icon:'🏆'},
+{id:'wins_10',name:'Десяточка',desc:'10 побед всего',icon:'🎯'},
+{id:'wins_25',name:'Опытный боец',desc:'25 побед всего',icon:'⚔️'},
+{id:'wins_50',name:'Мастер битв',desc:'50 побед всего',icon:'🗡️'},
+{id:'games_10',name:'Начинающий',desc:'Сыграй 10 матчей',icon:'🎲'},
+{id:'games_50',name:'Бывалый',desc:'Сыграй 50 матчей',icon:'🎓'},
+{id:'games_100',name:'Старожил',desc:'Сыграй 100 матчей',icon:'🎖️'},
+{id:'streak_3',name:'На кураже',desc:'3 победы подряд',icon:'🔥'},
+{id:'streak_5',name:'Неостановим',desc:'5 побед подряд',icon:'💥'},
+{id:'streak_10',name:'Легенда арены',desc:'10 побед подряд',icon:'👑'},
+{id:'char_wins_5',name:'Специалист',desc:'5 побед на одном персонаже',icon:'🎭'},
+{id:'char_wins_10',name:'Мастер персонажа',desc:'10 побед на одном персонаже',icon:'🏅'},
+{id:'collector_5',name:'Коллекционер',desc:'Играй на 5 разных персонажах',icon:'🎨'},
+{id:'collector_10',name:'Мультикласс',desc:'Играй на 10 разных персонажах',icon:'🌈'},
+{id:'perfect',name:'Идеальная игра',desc:'Победа с указанным ХП',icon:'💯'},
+{id:'speed',name:'Блиц',desc:'Победа за 10 минут',icon:'⏱️'},
+{id:'noob',name:'Я у мамы дурачок',desc:'10 игр без единой победы',icon:'😅'},
+{id:'comeback',name:'Камбэк!',desc:'Победи после 3 поражений подряд',icon:'🔄'},
+{id:'mmr_1200',name:'Эксперт',desc:'Достигни 1200+ MMR',icon:'💎'},
+{id:'mmr_1300',name:'Мастер',desc:'Достигни 1300+ MMR',icon:'👑'},
+{id:'top_streak',name:'Рекордсмен',desc:'Самая длинная серия побед среди всех',icon:'🏆'},
+{id:'all_chars',name:'Универсал',desc:'Сыграй на всех персонажах из своих наборов',icon:'🌟'}
+];
+
+var KEYS = {matches:'um_matches',players:'um_players',groups:'um_groups',ownedSets:'um_ownedSets',lastSeen:'um_lastSeenAch',theme:'um_theme',bg:'um_bg'};
+var state = {players:[], matches:[], groups:{}, ownedSets:[], theme:'light', bg:''};
+var ui = {mode:'1v1', subMode:'ffa', threePlayers:false, winner:1, survivors:[], optionalOpen:false, activeTab:'add'};
+
+function getPlayerCount(){
+  if(ui.mode==='1v1') return 2;
+  if(ui.subMode==='ffa' && ui.threePlayers) return 3;
+  return 4;
+}
+function getMatchMode(m){
+  if(m.mode==='1v1') return '1v1';
+  if(m.submode==='2v2') return '2v2';
+  return 'ffa';
+}
+
+function load(){
+  try{ state.matches = JSON.parse(localStorage.getItem(KEYS.matches)||'[]'); }catch(e){ state.matches=[]; }
+  try{ state.players = JSON.parse(localStorage.getItem(KEYS.players)||'[]'); }catch(e){ state.players=[]; }
+  try{ state.groups = JSON.parse(localStorage.getItem(KEYS.groups)||'null'); }catch(e){ state.groups=null; }
+  if(!state.groups) state.groups = JSON.parse(JSON.stringify(DEFAULT_GROUPS));
+  try{ state.ownedSets = JSON.parse(localStorage.getItem(KEYS.ownedSets)||'null'); }catch(e){ state.ownedSets=null; }
+  if(!Array.isArray(state.ownedSets)) state.ownedSets = ['Удары Судьбы','Родина Солнца'];
+  state.theme = localStorage.getItem(KEYS.theme) || 'light';
+  state.bg = localStorage.getItem(KEYS.bg) || '';
+  state.matches.forEach(function(m){
+    (m.players||[]).forEach(function(p){
+      if(p && p.name && state.players.indexOf(p.name)===-1) state.players.push(p.name);
+    });
+  });
+}
+function save(){
+  localStorage.setItem(KEYS.matches, JSON.stringify(state.matches));
+  localStorage.setItem(KEYS.players, JSON.stringify(state.players));
+  localStorage.setItem(KEYS.groups, JSON.stringify(state.groups));
+  localStorage.setItem(KEYS.ownedSets, JSON.stringify(state.ownedSets));
+  localStorage.setItem(KEYS.theme, state.theme);
+  localStorage.setItem(KEYS.bg, state.bg);
+}
+
+function computeDerived(){
+  var mmr = {}, pcs = {};
+  state.players.forEach(function(p){ mmr[p]=1000; });
+  state.matches.forEach(function(m){
+    var n = m.players.length;
+    var is2v2 = m.submode==='2v2';
+    m.players.forEach(function(p){
+      if(!(p.name in mmr)) mmr[p.name]=1000;
+      if(!pcs[p.name]) pcs[p.name]={};
+      if(!pcs[p.name][p.char]) pcs[p.name][p.char]={w:0,l:0};
+    });
+    m.players.forEach(function(p){
+      var won = is2v2 ? p.team===m.winnerTeam : p.name===m.winner;
+      var delta;
+      if(is2v2) delta = won ? 25 : -25;
+      else if(n===2) delta = won ? 25 : -25;
+      else delta = won ? 25*(n-1) : -25;
+      mmr[p.name] += delta;
+      if(won) pcs[p.name][p.char].w++;
+      else pcs[p.name][p.char].l++;
+    });
+  });
+  return { mmr:mmr, pcs:pcs };
+}
+
+function computeAchievements(){
+  var earned = new Map();
+  function grant(id,player){
+    if(!earned.has(id)) earned.set(id,new Set());
+    earned.get(id).add(player);
+  }
+  var derived = computeDerived();
+  var mmr = derived.mmr;
+  var agg = new Map();
+  function A(name){
+    if(!agg.has(name)){
+      agg.set(name,{games:0,wins:0,losses:0,chars:new Set(),charWins:{},curStreak:0,curStreakIsWin:null,maxWinStreak:0,hadComeback:false,hasPerfect:false,hasSpeed:false});
+    }
+    return agg.get(name);
+  }
+  var sorted = state.matches.slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+  sorted.forEach(function(m){
+    var is2v2 = m.submode==='2v2';
+    m.players.forEach(function(p){
+      var a = A(p.name);
+      a.games++; a.chars.add(p.char);
+      var won = is2v2 ? p.team===m.winnerTeam : p.name===m.winner;
+      var wasLossStreak3 = (a.curStreakIsWin===false && a.curStreak>=3);
+      if(a.curStreakIsWin===null){ a.curStreakIsWin=won; a.curStreak=1; }
+      else if(a.curStreakIsWin===won){ a.curStreak++; }
+      else { a.curStreakIsWin=won; a.curStreak=1; }
+      if(won){
+        a.wins++; a.charWins[p.char] = (a.charWins[p.char]||0)+1;
+        if(a.curStreak>a.maxWinStreak) a.maxWinStreak=a.curStreak;
+        if(wasLossStreak3) a.hadComeback=true;
+        if(m.winnerHp && String(m.winnerHp).trim()) a.hasPerfect=true;
+        var d = Number(m.duration);
+        if(Number.isFinite(d) && d>0 && d<=10) a.hasSpeed=true;
+      } else { a.losses++; }
+    });
+  });
+  var ownedChars = new Set();
+  state.ownedSets.forEach(function(set){
+    var arr = state.groups[set];
+    if(Array.isArray(arr)) arr.forEach(function(c){ ownedChars.add(c); });
+  });
+  agg.forEach(function(a,name){
+    if(a.games>=1) grant('first_match',name);
+    if(a.wins>=1) grant('first_win',name);
+    if(a.wins>=10) grant('wins_10',name);
+    if(a.wins>=25) grant('wins_25',name);
+    if(a.wins>=50) grant('wins_50',name);
+    if(a.games>=10) grant('games_10',name);
+    if(a.games>=50) grant('games_50',name);
+    if(a.games>=100) grant('games_100',name);
+    if(a.maxWinStreak>=3) grant('streak_3',name);
+    if(a.maxWinStreak>=5) grant('streak_5',name);
+    if(a.maxWinStreak>=10) grant('streak_10',name);
+    Object.keys(a.charWins).forEach(function(ch){
+      if(a.charWins[ch]>=5) grant('char_wins_5',name);
+      if(a.charWins[ch]>=10) grant('char_wins_10',name);
+    });
+    if(a.chars.size>=5) grant('collector_5',name);
+    if(a.chars.size>=10) grant('collector_10',name);
+    if(a.hasPerfect) grant('perfect',name);
+    if(a.hasSpeed) grant('speed',name);
+    if(a.games>=10 && a.wins===0) grant('noob',name);
+    if(a.hadComeback) grant('comeback',name);
+    if((mmr[name]||1000)>=1200) grant('mmr_1200',name);
+    if((mmr[name]||1000)>=1300) grant('mmr_1300',name);
+    if(ownedChars.size>0){
+      var hasAll=true;
+      ownedChars.forEach(function(c){ if(!a.chars.has(c)) hasAll=false; });
+      if(hasAll) grant('all_chars',name);
+    }
+  });
+  var globalMax = 0;
+  agg.forEach(function(a){ if(a.maxWinStreak>globalMax) globalMax=a.maxWinStreak; });
+  if(globalMax>=3){
+    agg.forEach(function(a,name){ if(a.maxWinStreak===globalMax) grant('top_streak',name); });
+  }
+  return earned;
+}
+
+function announceNewAchievements(){
+  var prevSet = new Set();
+  try{ JSON.parse(localStorage.getItem(KEYS.lastSeen)||'[]').forEach(function(k){ prevSet.add(k); }); }catch(e){}
+  var current = computeAchievements();
+  var newOnes = [];
+  current.forEach(function(players,id){
+    players.forEach(function(player){
+      var key = id+'::'+player;
+      if(!prevSet.has(key)){ newOnes.push({id:id,player:player}); prevSet.add(key); }
+    });
+  });
+  localStorage.setItem(KEYS.lastSeen, JSON.stringify(Array.from(prevSet)));
+  if(newOnes.length>0){
+    var text = newOnes.map(function(a){
+      var def = ACHIEVEMENTS.find(function(x){return x.id===a.id;});
+      return '• '+a.player+' — '+(def?def.name:a.id);
+    }).join('\n');
+    setTimeout(function(){ alert('🎉 Новые достижения:\n'+text); }, 100);
+  }
+}
+
+function $(id){ return document.getElementById(id); }
+function el(tag, opts){
+  var n = document.createElement(tag);
+  if(opts){
+    if(opts.class) n.className = opts.class;
+    if(opts.text!=null) n.textContent = opts.text;
+    if(opts.html!=null) n.innerHTML = opts.html;
+    if(opts.attrs) for(var k in opts.attrs) n.setAttribute(k, opts.attrs[k]);
+    if(opts.on) for(var ev in opts.on) n.addEventListener(ev, opts.on[ev]);
+    if(opts.children) opts.children.forEach(function(c){ if(c) n.appendChild(c); });
+  }
+  return n;
+}
+function clear(n){ while(n.firstChild) n.removeChild(n.firstChild); }
+
+function setMode(mode){
+  ui.mode = mode;
+  document.querySelectorAll('#modeBtns .mode-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.mode===mode);
+  });
+  if(mode==='1v1'){
+    ui.threePlayers = false;
+    $('submodeSection').classList.add('hidden');
+  } else {
+    $('submodeSection').classList.remove('hidden');
+    if(!ui.subMode) ui.subMode='ffa';
+  }
+  ui.winner = 1; ui.survivors = [];
+  renderPlayerBlocks(); renderWinnerBtns(); updateForecast();
+}
+
+function setSubMode(sub){
+  ui.subMode = sub;
+  document.querySelectorAll('#submodeSection .submode-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.sub===sub);
+  });
+  var wrap = $('threePlayersWrap');
+  if(sub==='ffa') wrap.classList.remove('hidden');
+  else { wrap.classList.add('hidden'); ui.threePlayers = false; $('threePlayersCb').checked = false; }
+  ui.winner = 1; ui.survivors = [];
+  renderPlayerBlocks(); renderWinnerBtns();
+}
+
+$('threePlayersCb').addEventListener('change', function(){
+  ui.threePlayers = this.checked;
+  ui.winner = 1; ui.survivors = [];
+  renderPlayerBlocks(); renderWinnerBtns();
+});
+
+function getPlayerColors(){
+  if(ui.mode==='1v1') return [{c:'var(--p1)',t:'Синий'},{c:'var(--p2)',t:'Красный'}];
+  if(ui.subMode==='ffa') {
+    if(ui.threePlayers) return [{c:'var(--p1)',t:'Синий'},{c:'var(--p2)',t:'Красный'},{c:'var(--p3)',t:'Зелёный'}];
+    return [{c:'var(--p1)',t:'Синий'},{c:'var(--p2)',t:'Красный'},{c:'var(--p3)',t:'Зелёный'},{c:'var(--p4)',t:'Оранжевый'}];
+  }
+  return [{c:'var(--p1)',t:'Команда 1'},{c:'var(--p1)',t:'Команда 1'},{c:'var(--p2)',t:'Команда 2'},{c:'var(--p2)',t:'Команда 2'}];
+}
+
+function renderPlayerBlocks(){
+  var container = $('playerBlocks'); clear(container);
+  var colors = getPlayerColors();
+  var count = getPlayerCount();
+  for(var i=1;i<=count;i++){
+    var block = el('div',{class:'player-block'});
+    var title = el('div',{class:'player-block-title',text:'Игрок '+i+' '});
+    var badge = el('span',{class:'player-badge',text:colors[i-1].t});
+    badge.style.background = colors[i-1].c;
+    title.appendChild(badge); block.appendChild(title);
+    var row = el('div',{class:'form-group player-select-row'});
+    var selName = el('select',{attrs:{id:'p'+i+'name'}});
+    fillPlayerSelect(selName);
+    selName.addEventListener('change', updateForecast);
+    var addBtn = el('button',{class:'add-player-btn',text:'+',attrs:{type:'button',title:'Добавить'}});
+    addBtn.addEventListener('click', addPlayerPrompt);
+    row.appendChild(selName); row.appendChild(addBtn); block.appendChild(row);
+    var charGroup = el('div',{class:'form-group'});
+    charGroup.appendChild(el('label',{text:'Персонаж'}));
+    var selChar = el('select',{attrs:{id:'p'+i+'char'}});
+    fillCharSelect(selChar);
+    selChar.addEventListener('change', updateForecast);
+    charGroup.appendChild(selChar); block.appendChild(charGroup);
+    container.appendChild(block);
+  }
+}
+
+function fillPlayerSelect(sel){
+  var cur = sel.value; clear(sel);
+  sel.appendChild(el('option',{text:'Выберите игрока',attrs:{value:''}}));
+  state.players.slice().sort().forEach(function(p){ sel.appendChild(el('option',{text:p,attrs:{value:p}})); });
+  if(cur) sel.value = cur;
+}
+
+function fillCharSelect(sel){
+  var cur = sel.value; clear(sel);
+  sel.appendChild(el('option',{text:'Выберите',attrs:{value:''}}));
+  Object.keys(state.groups).forEach(function(group){
+    var og = document.createElement('optgroup'); og.label = group;
+    (state.groups[group]||[]).forEach(function(ch){
+      var o = document.createElement('option'); o.value = ch; o.textContent = ch; og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  if(cur) sel.value = cur;
+}
+
+function renderWinnerBtns(){
+  var container = $('winnerBtns'); clear(container);
+  var label = $('winnerLabel');
+  var section = $('survivorSection');
+  var count = getPlayerCount();
+  if(ui.mode!=='1v1' && ui.subMode==='2v2'){
+    label.textContent = 'Победившая команда:';
+    [1,2].forEach(function(t){
+      var b = el('button',{class:'winner-btn'+(ui.winner===t?' active':''),text:'Команда '+t,attrs:{type:'button'}});
+      b.addEventListener('click', function(){ ui.winner=t; renderWinnerBtns(); updateSurvivorCheck(); updateForecast(); });
+      container.appendChild(b);
+    });
+    section.classList.remove('hidden'); updateSurvivorCheck();
+  } else {
+    label.textContent = 'Победитель:';
+    for(var i=1;i<=count;i++){
+      (function(i){
+        var b = el('button',{class:'winner-btn'+(ui.winner===i?' active':''),text:'Игрок '+i,attrs:{type:'button'}});
+        b.addEventListener('click', function(){ ui.winner=i; renderWinnerBtns(); updateForecast(); });
+        container.appendChild(b);
+      })(i);
+    }
+    section.classList.add('hidden');
+  }
+}
+
+function updateSurvivorCheck(){
+  var box = $('survivorCheck'); clear(box);
+  if(ui.mode==='1v1' || ui.subMode!=='2v2') return;
+  var start = ui.winner===1 ? 1 : 3;
+  var end = ui.winner===1 ? 2 : 4;
+  ui.survivors = [];
+  for(var i=start;i<=end;i++){
+    (function(i){
+      var lbl = el('label');
+      var cb = el('input',{attrs:{type:'checkbox',value:i}});
+      cb.checked = true;
+      cb.addEventListener('change', function(){
+        ui.survivors = Array.from(box.querySelectorAll('input:checked')).map(function(x){ return parseInt(x.value,10); });
+      });
+      lbl.appendChild(cb); lbl.appendChild(document.createTextNode(' Игрок '+i));
+      box.appendChild(lbl); ui.survivors.push(i);
+    })(i);
+  }
+}
+
+function getMatchupStats(c1,c2){
+  var wins=0,losses=0,total=0;
+  state.matches.forEach(function(m){
+    if(m.submode==='2v2' || m.players.length!==2) return;
+    var hasC1 = m.players.some(function(p){return p.char===c1;});
+    var hasC2 = m.players.some(function(p){return p.char===c2;});
+    if(!hasC1||!hasC2) return;
+    var p1 = m.players.find(function(p){return p.char===c1;});
+    total++;
+    if(m.winner===p1.name) wins++; else losses++;
+  });
+  return {wins:wins,losses:losses,total:total};
+}
+
+function updateForecast(){
+  var box = $('forecastBox'), txt = $('forecastText');
+  if(!box) return;
+  if(ui.mode!=='1v1'){ box.classList.add('hidden'); return; }
+  var c1 = ($('p1char')||{}).value;
+  var c2 = ($('p2char')||{}).value;
+  if(!c1||!c2||c1===c2){ box.classList.add('hidden'); return; }
+  var st = getMatchupStats(c1,c2);
+  if(st.total<3){ box.classList.add('hidden'); return; }
+  var wr1 = ((st.wins/st.total)*100).toFixed(0);
+  var wr2 = ((st.losses/st.total)*100).toFixed(0);
+  txt.textContent = '📊 '+c1+' vs '+c2+': '+wr1+'% / '+wr2+'% на '+st.total+' играх';
+  box.classList.remove('hidden');
+}
+
+function addPlayerPrompt(){
+  var name = prompt('Имя игрока:');
+  if(name===null) return;
+  name = name.trim();
+  if(!name) return;
+  if(state.players.indexOf(name)!==-1){ alert('Игрок уже есть в реестре.'); return; }
+  state.players.push(name); save();
+  for(var i=1;i<=4;i++){ var s = $('p'+i+'name'); if(s){ fillPlayerSelect(s); if(!s.value) s.value=name; } }
+  renderSettings();
+  alert('Игрок "'+name+'" добавлен.');
+}
+
+function addMatch(){
+  var count = getPlayerCount();
+  var players = [];
+  for(var i=1;i<=count;i++){
+    var name = ($('p'+i+'name')||{}).value || '';
+    var char = ($('p'+i+'char')||{}).value || '';
+    name = name.trim();
+    if(!name||!char){ alert('Заполни игрока и персонажа для всех слотов.'); return; }
+    players.push({name:name,char:char,team:i<=2?1:2});
+  }
+  var names = players.map(function(p){return p.name;});
+  if(new Set(names).size !== names.length){ alert('Игроки в матче должны быть разными.'); return; }
+
+  var winnerTeam = null, winnerName = null;
+  if(ui.mode!=='1v1' && ui.subMode==='2v2'){
+    winnerTeam = ui.winner;
+    if(!ui.survivors.length) ui.survivors = ui.winner===1?[1,2]:[3,4];
+  } else {
+    winnerName = players[ui.winner-1].name;
+  }
+
+  var match = {
+    id: Date.now(), date: new Date().toISOString(), players: players,
+    winner: winnerName, winnerTeam: winnerTeam,
+    survivors: (ui.mode!=='1v1' && ui.subMode==='2v2') ? ui.survivors.slice() : [],
+    notes: ($('notes')||{}).value || '',
+    duration: ($('duration')||{}).value ? Number($('duration').value) : null,
+    winnerHp: ($('winnerHp')||{}).value || '',
+    field: ($('field')||{}).value || '',
+    mode: ui.mode,
+    submode: ui.mode==='1v1' ? null : ui.subMode
+  };
+  state.matches.push(match); save();
+
+  for(var i=1;i<=4;i++){ var sn = $('p'+i+'name'); if(sn) sn.value=''; var sc = $('p'+i+'char'); if(sc) sc.value=''; }
+  if($('notes')) $('notes').value='';
+  if($('duration')) $('duration').value='';
+  if($('winnerHp')) $('winnerHp').value='';
+  if($('field')) $('field').value='';
+  $('forecastBox').classList.add('hidden');
+
+  announceNewAchievements();
+  renderAll();
+  var winMsg = (ui.mode!=='1v1' && ui.subMode==='2v2') ? ('Команда '+winnerTeam) : winnerName;
+  alert('Матч добавлен. Победил: '+winMsg);
+}
+
+function renderMatchups(){
+  var box = $('matchupContent'); clear(box);
+  var charsSet = new Set();
+  state.matches.forEach(function(m){ m.players.forEach(function(p){ if(p.char) charsSet.add(p.char); }); });
+  var chars = Array.from(charsSet).sort();
+  if(chars.length<2){ box.appendChild(el('div',{class:'empty',text:'Нужно минимум 2 разных персонажа'})); return; }
+  var table = el('table',{class:'matchup-table'});
+  var tr0 = el('tr'); tr0.appendChild(el('th'));
+  chars.forEach(function(c){ tr0.appendChild(el('th',{text:c})); });
+  table.appendChild(tr0);
+  chars.forEach(function(c1){
+    var tr = el('tr'); tr.appendChild(el('th',{text:c1}));
+    chars.forEach(function(c2){
+      var td;
+      if(c1===c2){ td = el('td',{class:'matchup-empty',text:'–'}); }
+      else {
+        var st = getMatchupStats(c1,c2);
+        if(st.total===0){ td = el('td',{class:'matchup-empty',text:'0'}); }
+        else {
+          var wr = (st.wins/st.total)*100;
+          var cls = 'matchup-neutral';
+          if(wr>60) cls='matchup-win'; else if(wr<40) cls='matchup-lose';
+          td = el('td',{class:'matchup-cell '+cls,html:wr.toFixed(0)+'%<br><small>('+st.total+')</small>'});
+          td.addEventListener('click', function(){ showMatchupDetail(c1,c2); });
+        }
+      }
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+  box.appendChild(table);
+}
+
+function showMatchupDetail(c1,c2){
+  var st = getMatchupStats(c1,c2);
+  var lines = ['Матчап: '+c1+' vs '+c2, '', 'Игр: '+st.total,
+    c1+': '+st.wins+' побед ('+(st.total?((st.wins/st.total)*100).toFixed(1):'0')+'%)',
+    c2+': '+st.losses+' побед ('+(st.total?((st.losses/st.total)*100).toFixed(1):'0')+'%)', '', 'Последние игры:'];
+  var recent = state.matches.filter(function(m){
+    return m.players.length===2 && m.players.some(function(p){return p.char===c1;}) && m.players.some(function(p){return p.char===c2;});
+  }).slice(-5).reverse();
+  recent.forEach(function(m){
+    var p1 = m.players.find(function(p){return p.char===c1;});
+    var winnerLabel = m.winner===p1.name ? c1 : c2;
+    lines.push('• '+m.players.map(function(p){return p.name+' ('+p.char+')';}).join(' vs ')+' → '+winnerLabel);
+  });
+  alert(lines.join('\n'));
+}
+
+function renderStats(){
+  var box = $('statsContent'); clear(box);
+  var stats = {};
+  state.matches.forEach(function(m){
+    var is2v2 = m.submode==='2v2';
+    m.players.forEach(function(p){
+      if(!stats[p.char]) stats[p.char]={w:0,l:0};
+      var won = is2v2 ? p.team===m.winnerTeam : p.name===m.winner;
+      if(won) stats[p.char].w++; else stats[p.char].l++;
+    });
+  });
+  var arr = Object.keys(stats).map(function(k){ return [k, stats[k]]; });
+  arr.sort(function(a,b){
+    var wa = a[1].w/(a[1].w+a[1].l||1);
+    var wb = b[1].w/(b[1].w+b[1].l||1);
+    return wb-wa;
+  });
+  if(!arr.length){ box.appendChild(el('div',{class:'empty',text:'Нет данных'})); return; }
+  arr.forEach(function(e){
+    var total = e[1].w+e[1].l;
+    var wr = total ? (e[1].w/total*100).toFixed(1) : '0';
+    var item = el('div',{class:'stat-item'});
+    item.appendChild(el('div',{class:'stat-name',text:e[0]}));
+    var right = el('div');
+    right.appendChild(el('div',{class:'stat-wins',text:e[1].w+' побед'}));
+    right.appendChild(el('div',{class:'stat-losses',text:e[1].l+' поражений'}));
+    right.appendChild(el('div',{class:'stat-wr',text:wr+'%'}));
+    item.appendChild(right); box.appendChild(item);
+  });
+}
+
+function masteryLevel(games){
+  if(games<5) return {name:'Новичок',cls:'mastery-novice'};
+  if(games<20) return {name:'Любитель',cls:'mastery-amateur'};
+  if(games<50) return {name:'Опытный',cls:'mastery-experienced'};
+  if(games<100) return {name:'Мастер',cls:'mastery-master'};
+  return {name:'Легенда',cls:'mastery-legend'};
+}
+
+function renderMastery(){
+  var box = $('masteryContent'); clear(box);
+  var derived = computeDerived();
+  var pcs = derived.pcs;
+  var players = Object.keys(pcs).sort();
+  if(!players.length){ box.appendChild(el('div',{class:'empty',text:'Нет данных'})); return; }
+  players.forEach(function(name){
+    var section = el('div',{class:'player-section'});
+    section.appendChild(el('div',{class:'player-section-title',text:name}));
+    var entries = Object.keys(pcs[name]).map(function(ch){ return [ch, pcs[name][ch]]; });
+    entries.sort(function(a,b){
+      var wa = a[1].w/(a[1].w+a[1].l||1);
+      var wb = b[1].w/(b[1].w+b[1].l||1);
+      return wb-wa;
+    });
+    entries.forEach(function(e){
+      var games = e[1].w+e[1].l;
+      var wr = games ? (e[1].w/games*100).toFixed(0) : '0';
+      var lvl = masteryLevel(games);
+      var item = el('div',{class:'stat-item',attrs:{style:'margin-top:8px'}});
+      var left = el('div',{class:'stat-name'});
+      left.appendChild(document.createTextNode(e[0]+' '));
+      left.appendChild(el('span',{class:'mastery-level '+lvl.cls,text:lvl.name}));
+      item.appendChild(left);
+      var right = el('div');
+      right.appendChild(el('div',{class:'stat-wins',text:e[1].w+' побед'}));
+      right.appendChild(el('div',{class:'stat-losses',text:e[1].l+' поражений'}));
+      right.appendChild(el('div',{class:'stat-wr',text:wr+'%'}));
+      item.appendChild(right); section.appendChild(item);
+    });
+    box.appendChild(section);
+  });
+}
+
+function getStreak(player){
+  var streak=0, isWin=null;
+  for(var i=state.matches.length-1;i>=0;i--){
+    var m = state.matches[i];
+    var p = m.players.find(function(x){return x.name===player;});
+    if(!p) continue;
+    var won = m.submode==='2v2' ? p.team===m.winnerTeam : m.winner===p.name;
+    if(isWin===null){ isWin=won; streak=1; }
+    else if(isWin===won){ streak++; }
+    else break;
+  }
+  return {count:streak,isWin:isWin===true};
+}
+
+function renderPlayers(){
+  var box = $('playersContent'); clear(box);
+  var derived = computeDerived();
+  var mmr = derived.mmr;
+  var names = Object.keys(mmr);
+  if(!names.length){ box.appendChild(el('div',{class:'empty',text:'Нет данных'})); return; }
+  var arr = names.map(function(name){
+    var w=0,l=0;
+    state.matches.forEach(function(m){
+      var p = m.players.find(function(x){return x.name===name;});
+      if(!p) return;
+      var won = m.submode==='2v2' ? p.team===m.winnerTeam : m.winner===p.name;
+      if(won) w++; else l++;
+    });
+    var total = w+l;
+    return {name:name,mmr:mmr[name],w:w,l:l,wr: total?(w/total*100).toFixed(1):'0',streak:getStreak(name)};
+  }).sort(function(a,b){ return b.mmr-a.mmr; });
+
+  box.appendChild(el('div',{class:'player-row-header',children:[el('div',{text:'Игрок'}),el('div',{text:'MMR'}),el('div',{text:'Винрейт'}),el('div',{text:'Игры'})]}));
+  arr.forEach(function(p){
+    var row = el('div',{class:'player-row-stat'});
+    var nameCell = el('div');
+    nameCell.appendChild(el('strong',{text:p.name}));
+    if(p.streak.count>0){
+      nameCell.appendChild(el('br'));
+      var cls = p.streak.isWin?'streak-win':'streak-lose';
+      var txt = p.streak.count+(p.streak.isWin?' побед':' поражений')+' подряд';
+      nameCell.appendChild(el('span',{class:'streak-badge '+cls,text:txt}));
+    }
+    row.appendChild(nameCell);
+    row.appendChild(el('div',{text:String(p.mmr)}));
+    row.appendChild(el('div',{text:p.wr+'%'}));
+    var gamesCell = el('div');
+    gamesCell.appendChild(el('span',{class:'stat-wins',text:p.w+' побед'}));
+    gamesCell.appendChild(el('br'));
+    gamesCell.appendChild(el('span',{class:'stat-losses',text:p.l+' поражений'}));
+    row.appendChild(gamesCell); box.appendChild(row);
+  });
+}
+
+function renderAchievements(){
+  var box = $('achContent'); clear(box);
+  var earned = computeAchievements();
+  ACHIEVEMENTS.forEach(function(a){
+    var players = earned.get(a.id) ? Array.from(earned.get(a.id)).sort() : [];
+    var unlocked = players.length>0;
+    var card = el('div',{class:'ach-card'+(unlocked?' unlocked':'')});
+    var head = el('div',{class:'ach-header'});
+    head.appendChild(el('span',{class:'ach-icon',text:a.icon}));
+    head.appendChild(el('span',{class:'ach-name',text:a.name}));
+    card.appendChild(head);
+    card.appendChild(el('div',{class:'ach-desc',text:a.desc}));
+    var hintText = unlocked ? ('✅ Получили ('+players.length+'): '+players.join(', ')) : '🔒 Ещё никто не получил';
+    card.appendChild(el('div',{class:'ach-hint',text:hintText}));
+    card.addEventListener('click', function(){
+      if(players.length) alert('🏆 '+a.name+'\n\n'+a.desc+'\n\n✅ Получили:\n• '+players.join('\n• '));
+      else alert('🔒 '+a.name+'\n\n'+a.desc+'\n\nЕщё никто не получил.');
+    });
+    box.appendChild(card);
+  });
+}
+
+function fillHistoryFilters(){
+  var fc = $('fChar'), fp = $('fPlayer');
+  var chars = [];
+  Object.keys(state.groups).forEach(function(k){ (state.groups[k]||[]).forEach(function(c){ if(chars.indexOf(c)===-1) chars.push(c); }); });
+  clear(fc); fc.appendChild(el('option',{text:'Все',attrs:{value:''}}));
+  chars.forEach(function(c){ fc.appendChild(el('option',{text:c,attrs:{value:c}})); });
+  clear(fp); fp.appendChild(el('option',{text:'Все',attrs:{value:''}}));
+  state.players.slice().sort().forEach(function(p){ fp.appendChild(el('option',{text:p,attrs:{value:p}})); });
+}
+
+function renderHistory(){
+  var fc = $('fChar'), fp = $('fPlayer');
+  var fChar = fc?fc.value:'', fPlayer = fp?fp.value:'';
+  var filtered = state.matches.filter(function(m){
+    if(fChar && !m.players.some(function(p){return p.char===fChar;})) return false;
+    if(fPlayer && !m.players.some(function(p){return p.name===fPlayer;})) return false;
+    return true;
+  });
+  var box = $('historyContent'); clear(box);
+  if(!filtered.length){ box.appendChild(el('div',{class:'empty',text:'Нет матчей'})); return; }
+  filtered.slice().reverse().forEach(function(m){
+    var item = el('div',{class:'match-item'});
+    var del = el('button',{class:'del-btn',text:'×',attrs:{type:'button'}});
+    del.addEventListener('click', function(){ deleteMatch(m.id); });
+    item.appendChild(del);
+    var modeText = m.mode==='1v1' ? ' [1×1]' : (m.submode==='2v2'?' [2×2]':' [FFA]');
+    var ps = m.players.map(function(p){return p.name+' ('+p.char+')';}).join(' vs ');
+    item.appendChild(el('div',{class:'match-info',text:ps+modeText}));
+    var d = new Date(m.date);
+    var ds = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var meta = ds;
+    if(m.field) meta += ' | Поле: '+m.field;
+    if(m.duration) meta += ' | '+m.duration+' мин';
+    item.appendChild(el('div',{class:'match-date',text:meta}));
+    if(m.notes) item.appendChild(el('div',{class:'match-date',text:'"'+m.notes+'"',attrs:{style:'font-style:italic;margin-top:4px'}}));
+    if(m.winnerHp) item.appendChild(el('div',{class:'match-date',text:'ХП победителей: '+m.winnerHp}));
+    var winText;
+    if(m.submode==='2v2'){
+      winText = 'Победила Команда '+m.winnerTeam;
+      if(m.survivors && m.survivors.length) winText += ' (выжили: Игрок '+m.survivors.join(', Игрок ')+')';
+    } else {
+      winText = 'Победил: '+m.winner;
+    }
+    item.appendChild(el('div',{class:'match-winner',text:winText}));
+    box.appendChild(item);
+  });
+}
+
+function deleteMatch(id){
+  if(!confirm('Удалить матч?')) return;
+  state.matches = state.matches.filter(function(m){ return m.id!==id; });
+  save(); renderAll();
+}
+
+function renderSettings(){
+  document.querySelectorAll('.theme-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.theme===state.theme); });
+  $('bgUrl').value = state.bg;
+  var setsBox = $('setsList'); clear(setsBox);
+  Object.keys(state.groups).forEach(function(setName){
+    var row = el('div',{class:'set-item'});
+    var cb = el('input',{attrs:{type:'checkbox'}});
+    cb.checked = state.ownedSets.indexOf(setName)!==-1;
+    cb.addEventListener('change', function(){
+      if(cb.checked){ if(state.ownedSets.indexOf(setName)===-1) state.ownedSets.push(setName); }
+      else { state.ownedSets = state.ownedSets.filter(function(s){return s!==setName;}); }
+      save(); announceNewAchievements(); renderAchievements();
+    });
+    var lbl = el('label',{text:setName+' ('+state.groups[setName].length+')'});
+    lbl.addEventListener('click', function(e){ e.preventDefault(); cb.click(); });
+    row.appendChild(cb); row.appendChild(lbl); setsBox.appendChild(row);
+  });
+  var plBox = $('playerList'); clear(plBox);
+  if(!state.players.length){ plBox.appendChild(el('div',{class:'empty',text:'Пока нет игроков'})); }
+  else {
+    state.players.slice().sort().forEach(function(p){
+      var row = el('div',{class:'char-row'});
+      row.appendChild(el('span',{text:p}));
+      var b = el('button',{class:'del-btn',text:'×',attrs:{type:'button',style:'position:static'}});
+      b.addEventListener('click', function(){
+        if(!confirm('Убрать игрока "'+p+'" из реестра?')) return;
+        state.players = state.players.filter(function(x){return x!==p;});
+        save(); renderAll();
+      });
+      row.appendChild(b); plBox.appendChild(row);
+    });
+  }
+  var charBox = $('charList'); clear(charBox);
+  Object.keys(state.groups).forEach(function(g){
+    charBox.appendChild(el('div',{html:'<div style="font-weight:700;color:var(--primary);margin-top:10px;font-size:12px">'+g+'</div>'}));
+    state.groups[g].forEach(function(c){
+      var row = el('div',{class:'char-row'});
+      row.appendChild(el('span',{text:c}));
+      var b = el('button',{class:'del-btn',text:'×',attrs:{type:'button',style:'position:static'}});
+      b.addEventListener('click', function(){
+        if(!confirm('Удалить персонажа "'+c+'"?')) return;
+        state.groups[g] = state.groups[g].filter(function(x){return x!==c;});
+        if(!state.groups[g].length) delete state.groups[g];
+        save(); renderAll();
+      });
+      row.appendChild(b); charBox.appendChild(row);
+    });
+  });
+}
+
+function setTab(name){
+  ui.activeTab = name;
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab===name); });
+  ['add','matchups','stats','players','ach','history','settings'].forEach(function(t){
+    $('tab-'+t).classList.toggle('hidden', t!==name);
+  });
+  if(name==='matchups') renderMatchups();
+  if(name==='stats'){ renderStats(); renderMastery(); }
+  if(name==='players') renderPlayers();
+  if(name==='ach') renderAchievements();
+  if(name==='history'){ fillHistoryFilters(); renderHistory(); }
+  if(name==='settings') renderSettings();
+}
+
+function applyTheme(){
+  document.body.classList.toggle('dark', state.theme==='dark');
+  document.querySelectorAll('.theme-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.theme===state.theme); });
+}
+function applyBg(){
+  if(state.bg){ document.body.style.backgroundImage = 'url('+JSON.stringify(state.bg)+')'; }
+  else { document.body.style.backgroundImage = ''; }
+}
+
+function exportData(){
+  var data = { matches: state.matches, players: state.players, groups: state.groups, ownedSets: state.ownedSets, theme: state.theme, bg: state.bg };
+  var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'unmatched_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  alert('Файл скачан.');
+}
+
+function importData(file){
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var d = JSON.parse(ev.target.result);
+      if(!Array.isArray(d.matches)) throw new Error('Неверный формат');
+      if(!confirm('Импортировать?\nМатчей: '+d.matches.length)) return;
+      state.matches = d.matches;
+      state.players = Array.isArray(d.players) ? d.players.slice() : [];
+      if(d.groups) state.groups = d.groups;
+      if(Array.isArray(d.ownedSets)) state.ownedSets = d.ownedSets;
+      if(d.theme) state.theme = d.theme;
+      if(d.bg!=null) state.bg = d.bg;
+      state.matches.forEach(function(m){
+        (m.players||[]).forEach(function(p){
+          if(p && p.name && state.players.indexOf(p.name)===-1) state.players.push(p.name);
+        });
+      });
+      save(); localStorage.removeItem(KEYS.lastSeen);
+      renderAll(); alert('Импортировано.');
+    }catch(err){ alert('Ошибка импорта: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function addChar(){
+  var name = ($('newCharName')||{}).value.trim();
+  var group = ($('newCharGroup')||{}).value.trim() || 'Другие';
+  if(!name){ alert('Введи имя персонажа'); return; }
+  if(!state.groups[group]) state.groups[group] = [];
+  if(state.groups[group].indexOf(name)!==-1){ alert('Уже есть'); return; }
+  state.groups[group].push(name); save();
+  $('newCharName').value='';
+  for(var i=1;i<=4;i++){ var s=$('p'+i+'char'); if(s) fillCharSelect(s); }
+  renderSettings(); alert('Добавлен: '+name);
+}
+
+function clearAll(){
+  if(!confirm('Удалить ВСЕ данные: матчи, игроков, достижения?')) return;
+  if(!confirm('Точно?')) return;
+  state.matches = []; state.players = []; save();
+  localStorage.removeItem(KEYS.lastSeen);
+  renderAll(); alert('Удалено.');
+}
+
+function renderAll(){
+  renderPlayerBlocks(); renderWinnerBtns(); updateForecast();
+  if(ui.activeTab==='matchups') renderMatchups();
+  if(ui.activeTab==='stats'){ renderStats(); renderMastery(); }
+  if(ui.activeTab==='players') renderPlayers();
+  if(ui.activeTab==='ach') renderAchievements();
+  if(ui.activeTab==='history'){ fillHistoryFilters(); renderHistory(); }
+  if(ui.activeTab==='settings') renderSettings();
+}
+
+function init(){
+  load();
+  document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ setTab(t.dataset.tab); }); });
+  document.querySelectorAll('#modeBtns .mode-btn').forEach(function(b){ b.addEventListener('click', function(){ setMode(b.dataset.mode); }); });
+  document.querySelectorAll('#submodeSection .submode-btn').forEach(function(b){ b.addEventListener('click', function(){ setSubMode(b.dataset.sub); }); });
+  $('addMatchBtn').addEventListener('click', addMatch);
+  $('addPlayerTop').addEventListener('click', addPlayerPrompt);
+  $('optionalToggle').addEventListener('click', function(){
+    ui.optionalOpen = !ui.optionalOpen;
+    $('optionalContent').classList.toggle('hidden', !ui.optionalOpen);
+    $('optionalToggle').textContent = (ui.optionalOpen?'▲':'▼')+' Дополнительные поля';
+  });
+  $('fChar').addEventListener('change', renderHistory);
+  $('fPlayer').addEventListener('change', renderHistory);
+  $('clearAllBtn').addEventListener('click', clearAll);
+  document.querySelectorAll('.theme-btn').forEach(function(b){
+    b.addEventListener('click', function(){ state.theme = b.dataset.theme; save(); applyTheme(); });
+  });
+  $('applyBgBtn').addEventListener('click', function(){ var url = $('bgUrl').value.trim(); state.bg = url; save(); applyBg(); });
+  $('removeBgBtn').addEventListener('click', function(){ state.bg = ''; save(); $('bgUrl').value=''; applyBg(); });
+  $('exportBtn').addEventListener('click', exportData);
+  $('importBtn').addEventListener('click', function(){ $('impFile').click(); });
+  $('impFile').addEventListener('change', function(e){ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=''; });
+  $('addCharBtn').addEventListener('click', addChar);
+  applyTheme(); applyBg(); setMode('1v1'); setTab('add');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
